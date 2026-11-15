@@ -1,0 +1,16 @@
+{
+  "name": "fomo-memecoin-bot",
+  "version": "1.0.0",
+  "description": "Bot de trading de memecoins Solana (flux pump.fun, les mêmes tokens que les onglets Nouveau / Migré de Fomo) avec notifications de migration",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.0",
+    "bs58": "^6.0.0"
+  }
+}
