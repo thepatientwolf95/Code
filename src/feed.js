@@ -34,13 +34,20 @@ export class Feed extends EventEmitter {
       else if (m.txType === 'migrate' || m.txType === 'migration') this.emit('migration', m);
       else if (m.txType === 'buy' || m.txType === 'sell') this.emit('trade', m);
     });
-    ws.addEventListener('error', (e) => this.emit('warn', `WebSocket: ${e.message || 'erreur'}`));
-    ws.addEventListener('close', () => {
-      if (this.closed) return;
-      this.emit('warn', `Flux déconnecté, reconnexion dans ${this.backoff / 1000}s`);
-      setTimeout(() => this.start(), this.backoff);
+    // Selon les cas, un échec émet 'error', 'close' ou les deux : on ne reconnecte qu'une fois par socket.
+    let done = false;
+    const retry = (why) => {
+      if (done || this.closed) return;
+      done = true;
+      this.emit('warn', `Flux déconnecté (${why}), reconnexion dans ${this.backoff / 1000}s`);
+      try {
+        ws.close();
+      } catch {}
+      setTimeout(() => this.closed || this.start(), this.backoff);
       this.backoff = Math.min(this.backoff * 2, 30000);
-    });
+    };
+    ws.addEventListener('error', (e) => retry(e.message || 'erreur réseau'));
+    ws.addEventListener('close', () => retry('connexion fermée'));
   }
 
   watch(mint) {
